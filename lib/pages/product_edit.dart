@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
+import '../scoped_models/product.dart';
 import '../models/product.dart';
 
 class ProductEditPage extends StatefulWidget {
@@ -106,11 +108,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
               //     child: Text('My Button'),
               //   ),
               // ),
-              RaisedButton(
-                child: Text('SAVE'),
-                textColor: Colors.white,
-                onPressed: _submitForm,
-              )
+              _buildSubmitButton()
             ],
           ),
         ),
@@ -118,14 +116,25 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
-  void _submitForm() {
+  Widget _buildSubmitButton() {
+    return ScopedModelDescendant<ProductModel>(
+        builder: (BuildContext context, Widget child, ProductModel model) {
+      return RaisedButton(
+        child: Text('SAVE'),
+        textColor: Colors.white,
+        onPressed: () => _submitForm(model.addProduct, model.updateProduct),
+      );
+    });
+  }
+
+  void _submitForm(Function addProduct, Function updateProduct) {
     if (!_formKey.currentState.validate()) {
       return;
     }
 
     _formKey.currentState.save();
     if (widget.product == null) {
-      widget.addProduct(
+      addProduct(
         Product(
           title: _formData['title'],
           description: _formData['description'],
@@ -134,7 +143,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
         ),
       );
     } else {
-      widget.updateProduct(
+      updateProduct(
         widget.productIndex,
         Product(
           title: _formData['title'],
